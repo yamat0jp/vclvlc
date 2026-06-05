@@ -7,6 +7,7 @@ object Form2: TForm2
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnKeyDown = FormKeyDown
   DesignerMasterStyle = 0
   object Panel2: TPanel
     Align = Client
@@ -149,6 +150,19 @@ object Form2: TForm2
         ImageIndex = -1
       end
     end
+    object MenuItem11: TMenuItem
+      Text = 'Window'
+      object MenuItem12: TMenuItem
+        Action = Action6
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem13: TMenuItem
+        Action = Action7
+        Locked = True
+        ImageIndex = -1
+      end
+    end
   end
   object Timer1: TTimer
     OnTimer = Timer1Timer
@@ -191,6 +205,14 @@ object Form2: TForm2
     object Action5: TAction
       Text = 'forward'
       OnExecute = Action5Execute
+    end
+    object Action6: TAction
+      Text = 'Top'
+      OnExecute = Action6Execute
+    end
+    object Action7: TAction
+      Text = 'FullScreen'
+      OnExecute = Action7Execute
     end
   end
 end

@@ -40,6 +40,11 @@ type
     Action5: TAction;
     MenuItem9: TMenuItem;
     MenuItem10: TMenuItem;
+    Action6: TAction;
+    MenuItem11: TMenuItem;
+    MenuItem12: TMenuItem;
+    Action7: TAction;
+    MenuItem13: TMenuItem;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -57,6 +62,10 @@ type
     procedure Action4Execute(Sender: TObject);
     procedure Action5Execute(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
+    procedure Action6Execute(Sender: TObject);
+    procedure Action7Execute(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar;
+      Shift: TShiftState);
   private
     { private êÈåæ }
   public
@@ -112,6 +121,25 @@ begin
   FmxPasLibVlcPlayer1.SetVideoPosInMs(ms);
 end;
 
+procedure TForm2.Action6Execute(Sender: TObject);
+begin
+  case FormStyle of
+    TFormStyle.Normal:
+      FormStyle := TFormStyle.StayOnTop;
+    TFormStyle.StayOnTop:
+      FormStyle := TFormStyle.Normal;
+  end;
+end;
+
+procedure TForm2.Action7Execute(Sender: TObject);
+begin
+  FullScreen:=true;
+  if Panel1.Visible then
+    Action2Execute(nil);
+  if ListView1.Visible then
+    Action3Execute(nil);
+end;
+
 procedure TForm2.ComboBox1Change(Sender: TObject);
 var
   i: integer;
@@ -150,6 +178,13 @@ procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
   position: Single);
 begin
   TrackBar1.Value := position;
+end;
+
+procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
+  var KeyChar: WideChar; Shift: TShiftState);
+begin
+  if Key = vkESCAPE then
+    FullScreen:=false;
 end;
 
 procedure TForm2.ListView1Change(Sender: TObject);
