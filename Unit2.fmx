@@ -1,0 +1,196 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  Caption = 'Form2'
+  ClientHeight = 678
+  ClientWidth = 984
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object Panel2: TPanel
+    Align = Client
+    Size.Width = 984.000000000000000000
+    Size.Height = 678.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object FmxPasLibVlcPlayer1: TFmxPasLibVlcPlayer
+      MultiResBitmap = <
+        item
+          Width = 320
+          Height = 160
+          PNG = {
+            89504E470D0A1A0A0000000D4948445200000140000000A008060000007DA3B5
+            9C0000000473424954080808087C0864880000022549444154789CEDD4310100
+            200CC0B0817FCF2063471305BD7A66E60D40D0DD0E00D8628040960102590608
+            6419209065804096010259060864192090658040960102590608641920906580
+            4096010259060864192090658040960102590608641920906580409601025906
+            0864192090658040960102590608641920906580409601025906086419209065
+            8040960102590608641920906580409601025906086419209065804096010259
+            0608641920906580409601025906086419209065804096010259060864192090
+            6580409601025906086419209065804096010259060864192090658040960102
+            5906086419209065804096010259060864192090658040960102590608641920
+            9065804096010259060864192090658040960102590608641920906580409601
+            0259060864192090658040960102590608641920906580409601025906086419
+            2090658040960102590608641920906580409601025906086419209065804096
+            0102590608641920906580409601025906086419209065804096010259060864
+            1920906580409601025906086419209065804096010259060864192090658040
+            9601025906086419209065804096010259060864192090658040960102590608
+            6419209065804096010259060864192090658040960102590608641920906580
+            4096010259060864192090658040960102590608641920906580409601025906
+            086419209065804096010259060864192090658040960102591F4C3F023F29FA
+            A92F0000000049454E44AE426082}
+        end>
+      Align = Client
+      Size.Width = 984.000000000000000000
+      Size.Height = 576.000000000000000000
+      Size.PlatformDefault = False
+      OnClick = FmxPasLibVlcPlayer1Click
+      SnapShotFmt = 'png'
+      OnMediaPlayerPositionChanged = FmxPasLibVlcPlayer1MediaPlayerPositionChanged
+      OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
+    end
+    object Panel1: TPanel
+      Align = Bottom
+      Position.Y = 576.000000000000000000
+      Size.Width = 984.000000000000000000
+      Size.Height = 102.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object Label1: TLabel
+        Position.X = 8.000000000000000000
+        Position.Y = 41.000000000000000000
+        Text = 'Label1'
+        TabOrder = 0
+      end
+      object Label2: TLabel
+        Position.X = 552.000000000000000000
+        Position.Y = 40.000000000000000000
+        Text = 'Label2'
+        TabOrder = 1
+      end
+      object TrackBar1: TTrackBar
+        CanParentFocus = True
+        Max = 1.000000000000000000
+        Orientation = Horizontal
+        Position.X = 104.000000000000000000
+        Position.Y = 40.000000000000000000
+        Size.Width = 409.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Tracking = False
+        OnTracking = TrackBar1Tracking
+      end
+      object ComboBox1: TComboBox
+        Items.Strings = (
+          'x1'
+          'x1.5'
+          'x2'
+          'x4')
+        ItemIndex = 0
+        Position.X = 552.000000000000000000
+        Position.Y = 65.000000000000000000
+        TabOrder = 3
+        OnChange = ComboBox1Change
+      end
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 608
+    Top = 128
+  end
+  object MainMenu1: TMainMenu
+    Left = 328
+    Top = 144
+    object MenuItem1: TMenuItem
+      Text = 'FIle'
+      object MenuItem2: TMenuItem
+        Action = Action1
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem3: TMenuItem
+        Locked = True
+        Text = 'End'
+        OnClick = MenuItem3Click
+      end
+    end
+    object MenuItem4: TMenuItem
+      Text = 'Edit'
+      object MenuItem5: TMenuItem
+        Action = Action2
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem6: TMenuItem
+        Locked = True
+        Text = 'Start'
+        OnClick = MenuItem6Click
+      end
+      object MenuItem7: TMenuItem
+        Locked = True
+        Text = 'Pause'
+        OnClick = MenuItem7Click
+      end
+      object MenuItem8: TMenuItem
+        Action = Action3
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem9: TMenuItem
+        Action = Action4
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem10: TMenuItem
+        Action = Action5
+        Locked = True
+        ImageIndex = -1
+      end
+    end
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 592
+    Top = 208
+  end
+  object ListView1: TListView
+    ItemAppearanceClassName = 'TImageListItemAppearance'
+    ItemEditAppearanceClassName = 'TImageListItemDeleteAppearance'
+    HeaderAppearanceClassName = 'TListHeaderObjects'
+    FooterAppearanceClassName = 'TListHeaderObjects'
+    Align = Right
+    Position.X = 768.000000000000000000
+    Size.Width = 216.000000000000000000
+    Size.Height = 678.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    Visible = False
+    OnChange = ListView1Change
+  end
+  object ActionList1: TActionList
+    Left = 472
+    Top = 136
+    object Action1: TAction
+      Text = 'Open'
+      OnExecute = Action1Execute
+    end
+    object Action2: TAction
+      Text = 'Show'
+      OnExecute = Action2Execute
+    end
+    object Action3: TAction
+      Text = 'Thumbnail'
+      OnExecute = Action3Execute
+    end
+    object Action4: TAction
+      Text = 'back'
+      OnExecute = Action4Execute
+    end
+    object Action5: TAction
+      Text = 'forward'
+      OnExecute = Action5Execute
+    end
+  end
+end
