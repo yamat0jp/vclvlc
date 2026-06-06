@@ -43,10 +43,13 @@ object Form2: TForm2
             A92F0000000049454E44AE426082}
         end>
       Align = Client
+      PopupMenu = PopupMenu1
       Size.Width = 984.000000000000000000
       Size.Height = 576.000000000000000000
       Size.PlatformDefault = False
-      OnClick = FmxPasLibVlcPlayer1Click
+      OnMouseDown = FmxPasLibVlcPlayer1MouseDown
+      OnMouseMove = FmxPasLibVlcPlayer1MouseMove
+      OnMouseUp = FmxPasLibVlcPlayer1MouseUp
       SnapShotFmt = 'png'
       OnMediaPlayerPositionChanged = FmxPasLibVlcPlayer1MediaPlayerPositionChanged
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
@@ -182,6 +185,29 @@ object Form2: TForm2
     TabOrder = 5
     Visible = False
     OnChange = ListView1Change
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 712
+    Top = 144
+    object MenuItem14: TMenuItem
+      Action = Action7
+      ImageIndex = -1
+    end
+    object MenuItem15: TMenuItem
+      Action = Action6
+      ImageIndex = -1
+    end
+    object MenuItem16: TMenuItem
+      Text = '-'
+    end
+    object MenuItem17: TMenuItem
+      Action = Action2
+      ImageIndex = -1
+    end
+    object MenuItem18: TMenuItem
+      Action = Action3
+      ImageIndex = -1
+    end
   end
   object ActionList1: TActionList
     Left = 472

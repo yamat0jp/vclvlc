@@ -45,6 +45,12 @@ type
     MenuItem12: TMenuItem;
     Action7: TAction;
     MenuItem13: TMenuItem;
+    PopupMenu1: TPopupMenu;
+    MenuItem14: TMenuItem;
+    MenuItem15: TMenuItem;
+    MenuItem16: TMenuItem;
+    MenuItem17: TMenuItem;
+    MenuItem18: TMenuItem;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -58,7 +64,6 @@ type
     procedure MenuItem6Click(Sender: TObject);
     procedure MenuItem7Click(Sender: TObject);
     procedure Action3Execute(Sender: TObject);
-    procedure FmxPasLibVlcPlayer1Click(Sender: TObject);
     procedure Action4Execute(Sender: TObject);
     procedure Action5Execute(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
@@ -66,8 +71,16 @@ type
     procedure Action7Execute(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar;
       Shift: TShiftState);
+    procedure FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
+      Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+    procedure FmxPasLibVlcPlayer1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Single);
+    procedure FmxPasLibVlcPlayer1MouseMove(Sender: TObject; Shift: TShiftState;
+      X, Y: Single);
   private
     { private êÈåæ }
+    mpos: TPointF;
+    mdown, mdrag: Boolean;
   public
     { public êÈåæ }
     title: string;
@@ -81,7 +94,7 @@ implementation
 
 {$R *.fmx}
 
-uses System.Threading;
+uses System.Threading, Winapi.Windows, Winapi.Messages, FMX.Platform.Win;
 
 procedure TForm2.Action1Execute(Sender: TObject);
 begin
@@ -133,7 +146,7 @@ end;
 
 procedure TForm2.Action7Execute(Sender: TObject);
 begin
-  FullScreen:=true;
+  FullScreen := true;
   if Panel1.Visible then
     Action2Execute(nil);
   if ListView1.Visible then
@@ -160,14 +173,6 @@ begin
       SetPlayRate(i);
 end;
 
-procedure TForm2.FmxPasLibVlcPlayer1Click(Sender: TObject);
-begin
-  if FmxPasLibVlcPlayer1.IsPlay then
-    MenuItem7Click(nil)
-  else
-    MenuItem6Click(nil);
-end;
-
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
   time: Int64);
 begin
@@ -180,11 +185,47 @@ begin
   TrackBar1.Value := position;
 end;
 
+procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+begin
+  mpos := TPointF.Create(X, Y);
+  mdown := true;
+  mdrag := false;
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1MouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Single);
+var
+  p: TPointF;
+begin
+  if mdown then
+  begin
+    p := TPointF.Create(X, Y) - mpos;
+    Left := Left + Round(p.X);
+    Top := Top + Round(p.Y);
+  end;
+  if p <> TPointF.Create(0, 0) then
+    mdrag := true;
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1MouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+begin
+  mdown := false;
+  if not mdrag then
+  begin
+    if FmxPasLibVlcPlayer1.IsPlay then
+      MenuItem7Click(nil)
+    else
+      MenuItem6Click(nil);
+  end;
+end;
+
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
   var KeyChar: WideChar; Shift: TShiftState);
 begin
   if Key = vkESCAPE then
-    FullScreen:=false;
+    FullScreen := false;
 end;
 
 procedure TForm2.ListView1Change(Sender: TObject);
@@ -239,7 +280,7 @@ begin
         end;
       finally
         Player.Free;
-        DeleteFile(filename);
+        DeleteFile(PWideChar(filename));
       end;
     end);
 end;
