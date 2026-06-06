@@ -8,9 +8,8 @@ uses
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.ListBox,
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
-  DragDrop, DropTarget, DragDropFile, PasLibVlcPlayerUnit, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
-  FMX.Gestures;
+  PasLibVlcPlayerUnit, FMX.ListView.Types,
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView;
 
 type
   TForm2 = class(TForm)
@@ -81,6 +80,8 @@ type
       Shift: TShiftState; X, Y: Single);
     procedure FmxPasLibVlcPlayer1MouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Single);
+    procedure FmxPasLibVlcPlayer1Click(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1DblClick(Sender: TObject);
   private
     { private êÈåæ }
     mpos: TPointF;
@@ -98,7 +99,7 @@ implementation
 
 {$R *.fmx}
 
-uses System.Threading, Winapi.Windows, Winapi.Messages, FMX.Platform.Win;
+uses System.Threading;
 
 const
   interval: Cardinal = 300;
@@ -186,6 +187,19 @@ begin
       SetPlayRate(i);
 end;
 
+procedure TForm2.FmxPasLibVlcPlayer1Click(Sender: TObject);
+begin
+  if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
+    MenuItem7Click(nil)
+  else
+    MenuItem6Click(nil);
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1DblClick(Sender: TObject);
+begin
+  Action7Execute(nil);
+end;
+
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
   time: Int64);
 begin
@@ -225,10 +239,6 @@ procedure TForm2.FmxPasLibVlcPlayer1MouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   mdown := false;
-  if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
-    MenuItem7Click(nil)
-  else
-    MenuItem6Click(nil);
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
