@@ -85,7 +85,7 @@ type
   private
     { private êÈåæ }
     mpos: TPointF;
-    mdown, mdrag: Boolean;
+    mdown, mdrag, dclick: Boolean;
   public
     { public êÈåæ }
     title: string;
@@ -189,31 +189,52 @@ end;
 
 procedure TForm2.FmxPasLibVlcPlayer1Click(Sender: TObject);
 begin
-  if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
-    MenuItem7Click(nil)
-  else
-    MenuItem6Click(nil);
+  TTask.Run(
+    procedure
+    begin
+      Sleep(300);
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          if dclick then
+          begin
+            dclick := false;
+            Exit;
+          end;
+          if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
+            MenuItem7Click(nil)
+          else
+            MenuItem6Click(nil);
+        end);
+    end);
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1DblClick(Sender: TObject);
 begin
-  Action7Execute(nil);
+  dclick := true;
+  mdown := false;
+  case WindowState of
+    TWindowState.wsNormal:
+      WindowState := TWindowState.wsMaximized;
+    TWindowState.wsMaximized:
+      WindowState := TWindowState.wsNormal;
+  end;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
-  time: Int64);
+time: Int64);
 begin
   Label2.Text := FmxPasLibVlcPlayer1.GetVideoLenStr;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
-  position: Single);
+position: Single);
 begin
   TrackBar1.Value := position;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   mpos := TPointF.Create(X, Y);
   mdown := true;
@@ -221,7 +242,7 @@ begin
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseMove(Sender: TObject;
-  Shift: TShiftState; X, Y: Single);
+Shift: TShiftState; X, Y: Single);
 var
   p: TPointF;
 begin
@@ -236,13 +257,13 @@ begin
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseUp(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   mdown := false;
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
-  var KeyChar: WideChar; Shift: TShiftState);
+var KeyChar: WideChar; Shift: TShiftState);
 begin
   if Key = vkESCAPE then
     FullScreen := false;
