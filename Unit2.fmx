@@ -8,6 +8,7 @@ object Form2: TForm2
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnKeyDown = FormKeyDown
+  Touch.InteractiveGestures = [LongTap, DoubleTap]
   DesignerMasterStyle = 0
   object Panel2: TPanel
     Align = Client
@@ -16,6 +17,7 @@ object Form2: TForm2
     Size.PlatformDefault = False
     TabOrder = 0
     object FmxPasLibVlcPlayer1: TFmxPasLibVlcPlayer
+      Touch.InteractiveGestures = [PressAndTap, LongTap, DoubleTap]
       MultiResBitmap = <
         item
           Width = 320
@@ -114,6 +116,10 @@ object Form2: TForm2
         Locked = True
         ImageIndex = -1
       end
+      object MenuItem21: TMenuItem
+        Locked = True
+        Text = '-'
+      end
       object MenuItem3: TMenuItem
         Locked = True
         Text = 'End'
@@ -127,6 +133,15 @@ object Form2: TForm2
         Locked = True
         ImageIndex = -1
       end
+      object MenuItem8: TMenuItem
+        Action = Action3
+        Locked = True
+        ImageIndex = -1
+      end
+      object MenuItem19: TMenuItem
+        Locked = True
+        Text = '-'
+      end
       object MenuItem6: TMenuItem
         Locked = True
         Text = 'Start'
@@ -137,10 +152,9 @@ object Form2: TForm2
         Text = 'Pause'
         OnClick = MenuItem7Click
       end
-      object MenuItem8: TMenuItem
-        Action = Action3
+      object MenuItem20: TMenuItem
         Locked = True
-        ImageIndex = -1
+        Text = '-'
       end
       object MenuItem9: TMenuItem
         Action = Action4

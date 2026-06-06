@@ -9,7 +9,8 @@ uses
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.ListBox,
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
   DragDrop, DropTarget, DragDropFile, PasLibVlcPlayerUnit, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView;
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
+  FMX.Gestures;
 
 type
   TForm2 = class(TForm)
@@ -51,6 +52,9 @@ type
     MenuItem16: TMenuItem;
     MenuItem17: TMenuItem;
     MenuItem18: TMenuItem;
+    MenuItem19: TMenuItem;
+    MenuItem20: TMenuItem;
+    MenuItem21: TMenuItem;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -95,6 +99,9 @@ implementation
 {$R *.fmx}
 
 uses System.Threading, Winapi.Windows, Winapi.Messages, FMX.Platform.Win;
+
+const
+  interval: Cardinal = 300;
 
 procedure TForm2.Action1Execute(Sender: TObject);
 begin
@@ -146,11 +153,17 @@ end;
 
 procedure TForm2.Action7Execute(Sender: TObject);
 begin
-  FullScreen := true;
-  if Panel1.Visible then
-    Action2Execute(nil);
-  if ListView1.Visible then
-    Action3Execute(nil);
+  mdown := false;
+  if FullScreen then
+    FullScreen := false
+  else
+  begin
+    FullScreen := true;
+    if Panel1.Visible then
+      Action2Execute(nil);
+    if ListView1.Visible then
+      Action3Execute(nil);
+  end;
 end;
 
 procedure TForm2.ComboBox1Change(Sender: TObject);
@@ -212,13 +225,10 @@ procedure TForm2.FmxPasLibVlcPlayer1MouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   mdown := false;
-  if not mdrag then
-  begin
-    if FmxPasLibVlcPlayer1.IsPlay then
-      MenuItem7Click(nil)
-    else
-      MenuItem6Click(nil);
-  end;
+  if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
+    MenuItem7Click(nil)
+  else
+    MenuItem6Click(nil);
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
