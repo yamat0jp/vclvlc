@@ -6,7 +6,7 @@
         <Projects Include="VclVLC.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Project1.dproj">
+        <Projects Include="FmxVLC.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -26,23 +26,23 @@
     <Target Name="VclVLC:Make">
         <MSBuild Projects="VclVLC.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Project1">
-        <MSBuild Projects="Project1.dproj"/>
+    <Target Name="FmxVLC">
+        <MSBuild Projects="FmxVLC.dproj"/>
     </Target>
-    <Target Name="Project1:Clean">
-        <MSBuild Projects="Project1.dproj" Targets="Clean"/>
+    <Target Name="FmxVLC:Clean">
+        <MSBuild Projects="FmxVLC.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="Project1:Make">
-        <MSBuild Projects="Project1.dproj" Targets="Make"/>
+    <Target Name="FmxVLC:Make">
+        <MSBuild Projects="FmxVLC.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="VclVLC;Project1"/>
+        <CallTarget Targets="VclVLC;FmxVLC"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VclVLC:Clean;Project1:Clean"/>
+        <CallTarget Targets="VclVLC:Clean;FmxVLC:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VclVLC:Make;Project1:Make"/>
+        <CallTarget Targets="VclVLC:Make;FmxVLC:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

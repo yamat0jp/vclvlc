@@ -49,6 +49,8 @@ object Form2: TForm2
       Size.Width = 984.000000000000000000
       Size.Height = 576.000000000000000000
       Size.PlatformDefault = False
+      OnDragOver = FmxPasLibVlcPlayer1DragOver
+      OnDragDrop = FmxPasLibVlcPlayer1DragDrop
       OnClick = FmxPasLibVlcPlayer1Click
       OnDblClick = FmxPasLibVlcPlayer1DblClick
       OnMouseDown = FmxPasLibVlcPlayer1MouseDown

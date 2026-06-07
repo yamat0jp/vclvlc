@@ -82,6 +82,11 @@ type
       X, Y: Single);
     procedure FmxPasLibVlcPlayer1Click(Sender: TObject);
     procedure FmxPasLibVlcPlayer1DblClick(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1DragDrop(Sender: TObject;
+      const Data: TDragObject; const Point: TPointF);
+    procedure FmxPasLibVlcPlayer1DragOver(Sender: TObject;
+      const Data: TDragObject; const Point: TPointF;
+      var Operation: TDragOperation);
   private
     { private éŒ¾ }
     mpos: TPointF;
@@ -99,7 +104,7 @@ implementation
 
 {$R *.fmx}
 
-uses System.Threading;
+uses System.Threading, FMX.Platform;
 
 const
   interval: Cardinal = 300;
@@ -188,11 +193,13 @@ begin
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1Click(Sender: TObject);
+const
+  interval: Cardinal = 300;
 begin
   TTask.Run(
     procedure
     begin
-      Sleep(300);
+      Sleep(interval);
       TThread.Synchronize(nil,
         procedure
         begin
@@ -219,6 +226,19 @@ begin
     TWindowState.wsMaximized:
       WindowState := TWindowState.wsNormal;
   end;
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1DragDrop(Sender: TObject;
+const Data: TDragObject; const Point: TPointF);
+begin
+  FmxPasLibVlcPlayer1.Play(Data.Files[0]);
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1DragOver(Sender: TObject;
+const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation);
+begin
+  if Length(Data.Files) > 0 then
+    Operation := TDragOperation.Move;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
