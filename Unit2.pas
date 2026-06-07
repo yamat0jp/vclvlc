@@ -9,7 +9,8 @@ uses
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.ListBox,
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
   PasLibVlcPlayerUnit, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView;
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
+  System.ImageList, FMX.ImgList;
 
 type
   TForm2 = class(TForm)
@@ -54,6 +55,9 @@ type
     MenuItem19: TMenuItem;
     MenuItem20: TMenuItem;
     MenuItem21: TMenuItem;
+    SpeedButton1: TSpeedButton;
+    SpeedButton2: TSpeedButton;
+    ImageList1: TImageList;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -87,13 +91,17 @@ type
     procedure FmxPasLibVlcPlayer1DragOver(Sender: TObject;
       const Data: TDragObject; const Point: TPointF;
       var Operation: TDragOperation);
+    procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1MediaPlayerEndReached(Sender: TObject);
   private
     { private êÈåæ }
     mpos: TPointF;
-    mdown, mdrag, dclick: Boolean;
+    mdown, dclick: Boolean;
   public
     { public êÈåæ }
     title: string;
+    filename: string;
     procedure Thumbnail;
   end;
 
@@ -112,7 +120,10 @@ const
 procedure TForm2.Action1Execute(Sender: TObject);
 begin
   if OpenDialog1.Execute then
-    FmxPasLibVlcPlayer1.Play(OpenDialog1.filename);
+  begin
+    filename := OpenDialog1.filename;
+    FmxPasLibVlcPlayer1.Play(filename);
+  end;
 end;
 
 procedure TForm2.Action2Execute(Sender: TObject);
@@ -208,10 +219,7 @@ begin
             dclick := false;
             Exit;
           end;
-          if not mdrag and FmxPasLibVlcPlayer1.IsPlay then
-            MenuItem7Click(nil)
-          else
-            MenuItem6Click(nil);
+          SpeedButton2Click(nil);
         end);
     end);
 end;
@@ -231,7 +239,8 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1DragDrop(Sender: TObject;
 const Data: TDragObject; const Point: TPointF);
 begin
-  FmxPasLibVlcPlayer1.Play(Data.Files[0]);
+  filename := Data.Files[0];
+  FmxPasLibVlcPlayer1.Play(filename);
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1DragOver(Sender: TObject;
@@ -241,9 +250,22 @@ begin
     Operation := TDragOperation.Move;
 end;
 
+procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerEndReached(Sender: TObject);
+begin
+  TThread.Queue(nil,
+    procedure
+    begin
+      if SpeedButton1.IsPressed then
+        FmxPasLibVlcPlayer1.Play(filename)
+      else
+        FmxPasLibVlcPlayer1.Stop;
+    end);
+end;
+
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
 time: Int64);
 begin
+  Label2.Tag := FmxPasLibVlcPlayer1.GetVideoLenInMs;
   Label2.Text := FmxPasLibVlcPlayer1.GetVideoLenStr;
 end;
 
@@ -258,7 +280,6 @@ Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   mpos := TPointF.Create(X, Y);
   mdown := true;
-  mdrag := false;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseMove(Sender: TObject;
@@ -272,8 +293,6 @@ begin
     Left := Left + Round(p.X);
     Top := Top + Round(p.Y);
   end;
-  if p <> TPointF.Create(0, 0) then
-    mdrag := true;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseUp(Sender: TObject;
@@ -313,6 +332,22 @@ begin
   FmxPasLibVlcPlayer1.Pause;
 end;
 
+procedure TForm2.SpeedButton1Click(Sender: TObject);
+begin
+  SpeedButton1.IsPressed := SpeedButton1.IsPressed;
+end;
+
+procedure TForm2.SpeedButton2Click(Sender: TObject);
+begin
+  with FmxPasLibVlcPlayer1 do
+    if IsPlay then
+      MenuItem7Click(nil)
+    else if IsPause then
+      MenuItem6Click(nil)
+    else
+      Play(filename);
+end;
+
 procedure TForm2.Thumbnail;
 begin
   ListView1.Items.Clear;
@@ -321,27 +356,27 @@ begin
     var
       Player: TFmxPasLibVlcPlayer;
       item: TListViewItem;
-      filename: string;
+      fname: string;
     begin
-      filename := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
+      fname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
       Player := TFmxPasLibVlcPlayer.Create(Self);
       try
-        Player.Play(OpenDialog1.filename);
+        Player.Play(filename);
         Sleep(300);
         Player.Pause;
         Player.EventsEnable;
         for var i := 0 to 9 do
         begin
           Player.SetVideoPosInPercent(i * 10);
-          Player.SnapShot(filename, 50, 50);
+          Player.SnapShot(fname, 50, 50);
           item := ListView1.Items.Add;
-          item.Bitmap.LoadFromFile(filename);
+          item.Bitmap.LoadFromFile(fname);
           item.Text := (i * 10).ToString;
           item.Tag := i * 10;
         end;
       finally
         Player.Free;
-        DeleteFile(PWideChar(filename));
+        DeleteFile(fname);
       end;
     end);
 end;

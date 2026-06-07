@@ -57,6 +57,7 @@ object Form2: TForm2
       OnMouseMove = FmxPasLibVlcPlayer1MouseMove
       OnMouseUp = FmxPasLibVlcPlayer1MouseUp
       SnapShotFmt = 'png'
+      OnMediaPlayerEndReached = FmxPasLibVlcPlayer1MediaPlayerEndReached
       OnMediaPlayerPositionChanged = FmxPasLibVlcPlayer1MediaPlayerPositionChanged
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
     end
@@ -69,13 +70,13 @@ object Form2: TForm2
       TabOrder = 1
       object Label1: TLabel
         Position.X = 8.000000000000000000
-        Position.Y = 41.000000000000000000
+        Position.Y = 17.000000000000000000
         Text = 'Label1'
         TabOrder = 0
       end
       object Label2: TLabel
         Position.X = 552.000000000000000000
-        Position.Y = 40.000000000000000000
+        Position.Y = 16.000000000000000000
         Text = 'Label2'
         TabOrder = 1
       end
@@ -84,7 +85,7 @@ object Form2: TForm2
         Max = 1.000000000000000000
         Orientation = Horizontal
         Position.X = 104.000000000000000000
-        Position.Y = 40.000000000000000000
+        Position.Y = 14.000000000000000000
         Size.Width = 409.000000000000000000
         Size.Height = 19.000000000000000000
         Size.PlatformDefault = False
@@ -103,6 +104,27 @@ object Form2: TForm2
         Position.Y = 65.000000000000000000
         TabOrder = 3
         OnChange = ComboBox1Change
+      end
+      object SpeedButton1: TSpeedButton
+        StaysPressed = True
+        Position.X = 360.000000000000000000
+        Position.Y = 56.000000000000000000
+        Size.Width = 25.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'SpeedButton1'
+        TextSettings.Trimming = None
+        OnClick = SpeedButton1Click
+      end
+      object SpeedButton2: TSpeedButton
+        Position.X = 248.000000000000000000
+        Position.Y = 40.000000000000000000
+        Size.Width = 65.000000000000000000
+        Size.Height = 49.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'SpeedButton2'
+        TextSettings.Trimming = None
+        OnClick = SpeedButton2Click
       end
     end
   end
@@ -258,5 +280,11 @@ object Form2: TForm2
       Text = 'FullScreen'
       OnExecute = Action7Execute
     end
+  end
+  object ImageList1: TImageList
+    Source = <>
+    Destination = <>
+    Left = 688
+    Top = 216
   end
 end
