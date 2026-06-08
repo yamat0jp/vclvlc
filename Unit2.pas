@@ -55,9 +55,15 @@ type
     MenuItem19: TMenuItem;
     MenuItem20: TMenuItem;
     MenuItem21: TMenuItem;
-    SpeedButton1: TSpeedButton;
     SpeedButton2: TSpeedButton;
     ImageList1: TImageList;
+    StyleBook1: TStyleBook;
+    MenuItem22: TMenuItem;
+    MenuItem23: TMenuItem;
+    MenuItem24: TMenuItem;
+    MenuItem25: TMenuItem;
+    Action9: TAction;
+    SpeedButton1: TSpeedButton;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -66,7 +72,6 @@ type
     procedure TrackBar1Tracking(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
     procedure MenuItem6Click(Sender: TObject);
     procedure MenuItem7Click(Sender: TObject);
@@ -91,9 +96,11 @@ type
     procedure FmxPasLibVlcPlayer1DragOver(Sender: TObject;
       const Data: TDragObject; const Point: TPointF;
       var Operation: TDragOperation);
-    procedure SpeedButton2Click(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerEndReached(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure Action9Execute(Sender: TObject);
+    procedure MenuItem25Click(Sender: TObject);
   private
     { private êÈåæ }
     mpos: TPointF;
@@ -129,10 +136,6 @@ end;
 procedure TForm2.Action2Execute(Sender: TObject);
 begin
   Panel1.Visible := not Panel1.Visible;
-  if Panel1.Visible then
-    FmxPasLibVlcPlayer1.EventsEnable
-  else
-    FmxPasLibVlcPlayer1.EventsDisable;
 end;
 
 procedure TForm2.Action3Execute(Sender: TObject);
@@ -183,6 +186,17 @@ begin
   end;
 end;
 
+procedure TForm2.Action9Execute(Sender: TObject);
+begin
+  with FmxPasLibVlcPlayer1 do
+    if IsPlay then
+      MenuItem7Click(nil)
+    else if IsPause then
+      MenuItem6Click(nil)
+    else
+      Play(filename);
+end;
+
 procedure TForm2.ComboBox1Change(Sender: TObject);
 var
   i: integer;
@@ -219,7 +233,7 @@ begin
             dclick := false;
             Exit;
           end;
-          SpeedButton2Click(nil);
+          Action9Execute(nil);
         end);
     end);
 end;
@@ -255,7 +269,7 @@ begin
   TThread.Queue(nil,
     procedure
     begin
-      if SpeedButton1.IsPressed then
+      if MenuItem25.IsChecked then
         FmxPasLibVlcPlayer1.Play(filename)
       else
         FmxPasLibVlcPlayer1.Stop;
@@ -301,6 +315,16 @@ begin
   mdown := false;
 end;
 
+procedure TForm2.FormCreate(Sender: TObject);
+begin
+  FmxPasLibVlcPlayer1.EventsEnable
+end;
+
+procedure TForm2.FormDestroy(Sender: TObject);
+begin
+  FmxPasLibVlcPlayer1.EventsDisable;
+end;
+
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
 var KeyChar: WideChar; Shift: TShiftState);
 begin
@@ -314,6 +338,12 @@ var
 begin
   item := ListView1.Items[ListView1.ItemIndex];
   FmxPasLibVlcPlayer1.SetVideoPosInPercent(item.Tag);
+end;
+
+procedure TForm2.MenuItem25Click(Sender: TObject);
+begin
+  MenuItem25.IsChecked := not MenuItem25.IsChecked;
+  SpeedButton1.IsPressed := MenuItem25.IsChecked;
 end;
 
 procedure TForm2.MenuItem3Click(Sender: TObject);
@@ -330,22 +360,6 @@ end;
 procedure TForm2.MenuItem7Click(Sender: TObject);
 begin
   FmxPasLibVlcPlayer1.Pause;
-end;
-
-procedure TForm2.SpeedButton1Click(Sender: TObject);
-begin
-  SpeedButton1.IsPressed := SpeedButton1.IsPressed;
-end;
-
-procedure TForm2.SpeedButton2Click(Sender: TObject);
-begin
-  with FmxPasLibVlcPlayer1 do
-    if IsPlay then
-      MenuItem7Click(nil)
-    else if IsPause then
-      MenuItem6Click(nil)
-    else
-      Play(filename);
 end;
 
 procedure TForm2.Thumbnail;
@@ -379,11 +393,6 @@ begin
         DeleteFile(fname);
       end;
     end);
-end;
-
-procedure TForm2.Timer1Timer(Sender: TObject);
-begin
-  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
 end;
 
 procedure TForm2.TrackBar1Tracking(Sender: TObject);
