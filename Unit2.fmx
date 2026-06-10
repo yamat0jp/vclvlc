@@ -13265,6 +13265,13 @@ object Form2: TForm2
     Left = 488
     Top = 208
   end
+  object Timer2: TTimer
+    Enabled = False
+    Interval = 300
+    OnTimer = Timer2Timer
+    Left = 320
+    Top = 216
+  end
   object ActionList1: TActionList
     Left = 472
     Top = 136
