@@ -72,15 +72,18 @@ object Form2: TForm2
       Size.PlatformDefault = False
       TabOrder = 1
       object Label1: TLabel
-        Position.X = 8.000000000000000000
+        Position.X = 24.000000000000000000
         Position.Y = 17.000000000000000000
-        Text = 'Label1'
+        Size.Width = 65.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = '- -  :  - -'
         TabOrder = 0
       end
       object Label2: TLabel
         Position.X = 552.000000000000000000
         Position.Y = 16.000000000000000000
-        Text = 'Label2'
+        Text = '- -  :  - -'
         TabOrder = 1
       end
       object TrackBar1: TTrackBar
@@ -118,16 +121,35 @@ object Form2: TForm2
         Size.PlatformDefault = False
         TextSettings.Trimming = None
       end
-      object SpeedButton1: TSpeedButton
-        StaysPressed = True
-        Position.X = 352.000000000000000000
-        Position.Y = 46.000000000000000000
-        Size.Width = 25.000000000000000000
+      object SpeedButton3: TSpeedButton
+        Action = Action4
+        ImageIndex = -1
+        Position.X = 120.000000000000000000
+        Position.Y = 56.000000000000000000
+        Size.Width = 41.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
-        Text = 'SpeedButton1'
         TextSettings.Trimming = None
-        OnClick = MenuItem25Click
+      end
+      object SpeedButton4: TSpeedButton
+        Action = Action5
+        ImageIndex = -1
+        Position.X = 176.000000000000000000
+        Position.Y = 56.000000000000000000
+        Size.Width = 40.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Trimming = None
+      end
+      object Switch1: TSwitch
+        Action = Action8
+        Hint = 'Repeat'
+        Position.X = 360.000000000000000000
+        Position.Y = 46.000000000000000000
+        Size.Width = 49.000000000000000000
+        Size.Height = 27.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 6
       end
     end
   end
@@ -186,9 +208,9 @@ object Form2: TForm2
         Text = '-'
       end
       object MenuItem25: TMenuItem
+        Action = Action8
         Locked = True
-        Text = 'repeat'
-        OnClick = MenuItem25Click
+        ImageIndex = -1
       end
     end
     object MenuItem11: TMenuItem
@@ -262,7 +284,8 @@ object Form2: TForm2
       Text = '-'
     end
     object MenuItem23: TMenuItem
-      Text = 'MenuItem23'
+      Action = Action8
+      ImageIndex = -1
     end
   end
   object StyleBook1: TStyleBook
@@ -13284,6 +13307,11 @@ object Form2: TForm2
       Category = 'button'
       Text = 'main'
       OnExecute = Action9Execute
+    end
+    object Action8: TAction
+      Category = 'button'
+      Text = 'Repeat'
+      OnExecute = Action8Execute
     end
   end
   object ImageList1: TImageList

@@ -63,7 +63,10 @@ type
     MenuItem24: TMenuItem;
     MenuItem25: TMenuItem;
     Action9: TAction;
-    SpeedButton1: TSpeedButton;
+    SpeedButton3: TSpeedButton;
+    SpeedButton4: TSpeedButton;
+    Action8: TAction;
+    Switch1: TSwitch;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
@@ -100,7 +103,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Action9Execute(Sender: TObject);
-    procedure MenuItem25Click(Sender: TObject);
+    procedure Action8Execute(Sender: TObject);
   private
     { private êÈåæ }
     mpos: TPointF;
@@ -136,11 +139,13 @@ end;
 procedure TForm2.Action2Execute(Sender: TObject);
 begin
   Panel1.Visible := not Panel1.Visible;
+  Action2.Checked := Panel1.Visible;
 end;
 
 procedure TForm2.Action3Execute(Sender: TObject);
 begin
   ListView1.Visible := not ListView1.Visible;
+  Action3.Checked := ListView1.Visible;
   if ListView1.Visible then
     Thumbnail;
 end;
@@ -184,6 +189,12 @@ begin
     if ListView1.Visible then
       Action3Execute(nil);
   end;
+end;
+
+procedure TForm2.Action8Execute(Sender: TObject);
+begin
+  MenuItem25.IsChecked := not MenuItem25.IsChecked;
+  Switch1.IsChecked := MenuItem25.IsChecked;
 end;
 
 procedure TForm2.Action9Execute(Sender: TObject);
@@ -287,6 +298,7 @@ procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
 position: Single);
 begin
   TrackBar1.Value := position;
+  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
@@ -317,7 +329,8 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 begin
-  FmxPasLibVlcPlayer1.EventsEnable
+  FmxPasLibVlcPlayer1.EventsEnable;
+  Action2.Checked := Panel1.Visible;
 end;
 
 procedure TForm2.FormDestroy(Sender: TObject);
@@ -338,12 +351,6 @@ var
 begin
   item := ListView1.Items[ListView1.ItemIndex];
   FmxPasLibVlcPlayer1.SetVideoPosInPercent(item.Tag);
-end;
-
-procedure TForm2.MenuItem25Click(Sender: TObject);
-begin
-  MenuItem25.IsChecked := not MenuItem25.IsChecked;
-  SpeedButton1.IsPressed := MenuItem25.IsChecked;
 end;
 
 procedure TForm2.MenuItem3Click(Sender: TObject);
