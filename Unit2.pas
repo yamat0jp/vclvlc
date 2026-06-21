@@ -10,7 +10,7 @@ uses
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
   PasLibVlcPlayerUnit, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
-  System.ImageList, FMX.ImgList;
+  System.ImageList, FMX.ImgList, FMX.Edit, FMX.EditBox, FMX.ComboTrackBar;
 
 type
   TForm2 = class(TForm)
@@ -30,7 +30,6 @@ type
     Action2: TAction;
     MenuItem4: TMenuItem;
     MenuItem5: TMenuItem;
-    Timer1: TTimer;
     ComboBox1: TComboBox;
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
@@ -68,10 +67,11 @@ type
     Action8: TAction;
     Switch1: TSwitch;
     Timer2: TTimer;
+    ComboTrackBar1: TComboTrackBar;
+    Label3: TLabel;
+    Timer1: TTimer;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
-    procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
-      position: Single);
     procedure Action1Execute(Sender: TObject);
     procedure TrackBar1Tracking(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
@@ -106,10 +106,15 @@ type
     procedure Action9Execute(Sender: TObject);
     procedure Action8Execute(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
+    procedure ComboTrackBar1Change(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private êÈåæ }
     mpos: TPointF;
     mmove, mdown, dclick: Boolean;
+    userSeeking: Boolean;
+    procedure DropURL(const name: string);
   public
     { public êÈåæ }
     title: string;
@@ -124,7 +129,7 @@ implementation
 
 {$R *.fmx}
 
-uses System.Threading, FMX.Platform;
+uses System.Threading, FMX.Platform, IniFiles;
 
 const
   interval: Cardinal = 300;
@@ -212,22 +217,50 @@ end;
 
 procedure TForm2.ComboBox1Change(Sender: TObject);
 var
-  i: integer;
+  i: Integer;
 begin
   i := 0;
   case ComboBox1.ItemIndex of
     0:
-      i := 100;
+      i := 50;
     1:
-      i := 150;
+      i := 100;
     2:
-      i := 200;
+      i := 150;
     3:
+      i := 200;
+    4:
       i := 400;
   end;
   with FmxPasLibVlcPlayer1 do
     if i <> GetPlayRate then
       SetPlayRate(i);
+end;
+
+procedure TForm2.ComboTrackBar1Change(Sender: TObject);
+var
+  num: Integer;
+begin
+  num := Round(ComboTrackBar1.Value);
+  FmxPasLibVlcPlayer1.SetAudioVolume(num);
+end;
+
+procedure TForm2.DropURL(const name: string);
+var
+  ini: TIniFile;
+  s: string;
+begin
+  ini := TIniFile.Create(name);
+  try
+    s := ini.ReadString('InternetShortcut', 'URL', '');
+  finally
+    ini.Free;
+  end;
+  if s > '' then
+  begin
+    filename := s;
+    FmxPasLibVlcPlayer1.Play(filename);
+  end;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1Click(Sender: TObject);
@@ -250,15 +283,26 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1DragDrop(Sender: TObject;
   const Data: TDragObject; const Point: TPointF);
 begin
-  filename := Data.Files[0];
-  FmxPasLibVlcPlayer1.Play(filename);
+  if Length(Data.Files) > 0 then
+  begin
+    filename := Data.Files[0];
+    if ExtractFileExt(filename).ToLower = '.url' then
+      DropURL(filename)
+    else
+      FmxPasLibVlcPlayer1.Play(filename);
+    Exit;
+  end;
+  if (Data.Files <> nil) and (Data.Data.ToString <> '') then
+  begin
+    filename := Data.Data.ToString;
+    FmxPasLibVlcPlayer1.PlayYoutube(filename);
+  end;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1DragOver(Sender: TObject;
   const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation);
 begin
-  if Length(Data.Files) > 0 then
-    Operation := TDragOperation.Move;
+  Operation := TDragOperation.Move;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerEndReached(Sender: TObject);
@@ -280,11 +324,9 @@ begin
   Label2.Text := FmxPasLibVlcPlayer1.GetVideoLenStr;
 end;
 
-procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
-position: Single);
+procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
 begin
-  TrackBar1.Value := position;
-  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
+  Caption := ExtractFileName(filename);
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
@@ -319,6 +361,8 @@ procedure TForm2.FormCreate(Sender: TObject);
 begin
   FmxPasLibVlcPlayer1.EventsEnable;
   Action2.Checked := Panel1.Visible;
+  ComboTrackBar1Change(nil);
+  Caption := 'no title';
 end;
 
 procedure TForm2.FormDestroy(Sender: TObject);
@@ -366,18 +410,18 @@ begin
       Player: TFmxPasLibVlcPlayer;
       fname: string;
     begin
-      fname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
-      Player := TFmxPasLibVlcPlayer.Create(Self);
+      Player := TFmxPasLibVlcPlayer.Create(nil);
       try
+        fname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
         Player.Play(filename);
         Sleep(300);
         Player.Pause;
         for var i := 0 to 9 do
         begin
           Player.SetVideoPosInPercent(i * 10);
-          Sleep(150);
+          Sleep(200);
           Player.SnapShot(fname, 50, 50);
-          Sleep(150);
+          Sleep(200);
           TThread.Queue(nil,
             procedure
             var
@@ -392,9 +436,21 @@ begin
         end;
       finally
         Player.Free;
-        DeleteFile(fname);
+        TThread.Queue(nil,
+          procedure
+          begin
+            if FileExists(fname) then
+              DeleteFile(fname);
+          end);
       end;
     end);
+end;
+
+procedure TForm2.Timer1Timer(Sender: TObject);
+begin
+  userSeeking := true;
+  TrackBar1.Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
+  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
 end;
 
 procedure TForm2.Timer2Timer(Sender: TObject);
@@ -407,13 +463,10 @@ begin
 end;
 
 procedure TForm2.TrackBar1Tracking(Sender: TObject);
-var
-  Value: Single;
 begin
-  Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
-  if (Value < TrackBar1.Value * 100 - 1) or (Value > TrackBar1.Value * 100 + 1)
-  then
-    FmxPasLibVlcPlayer1.SetVideoPosInPercent(TrackBar1.Value * 100);
+  if not userSeeking then
+    FmxPasLibVlcPlayer1.SetVideoPosInPercent(TrackBar1.Value);
+  userSeeking := false;
 end;
 
 end.

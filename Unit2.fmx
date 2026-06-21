@@ -60,8 +60,8 @@ object Form2: TForm2
       OnMouseMove = FmxPasLibVlcPlayer1MouseMove
       OnMouseUp = FmxPasLibVlcPlayer1MouseUp
       SnapShotFmt = 'png'
+      OnMediaPlayerOpening = FmxPasLibVlcPlayer1MediaPlayerOpening
       OnMediaPlayerEndReached = FmxPasLibVlcPlayer1MediaPlayerEndReached
-      OnMediaPlayerPositionChanged = FmxPasLibVlcPlayer1MediaPlayerPositionChanged
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
     end
     object Panel1: TPanel
@@ -88,7 +88,6 @@ object Form2: TForm2
       end
       object TrackBar1: TTrackBar
         CanParentFocus = True
-        Max = 1.000000000000000000
         Orientation = Horizontal
         Position.X = 104.000000000000000000
         Position.Y = 14.000000000000000000
@@ -101,11 +100,12 @@ object Form2: TForm2
       end
       object ComboBox1: TComboBox
         Items.Strings = (
+          'x0.5'
           'x1'
           'x1.5'
           'x2'
           'x4')
-        ItemIndex = 0
+        ItemIndex = 1
         Position.X = 552.000000000000000000
         Position.Y = 65.000000000000000000
         TabOrder = 3
@@ -150,6 +150,29 @@ object Form2: TForm2
         Size.Height = 27.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 6
+      end
+      object ComboTrackBar1: TComboTrackBar
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        TabOrder = 7
+        Cursor = crIBeam
+        Value = 100.000000000000000000
+        KeyboardType = NumberPad
+        Frequency = 0.000000000000000000
+        Position.X = 760.000000000000000000
+        Position.Y = 40.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        OnChange = ComboTrackBar1Change
+      end
+      object Label3: TLabel
+        Position.X = 760.000000000000000000
+        Position.Y = 15.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Volume'
+        TabOrder = 9
       end
     end
   end
@@ -239,10 +262,6 @@ object Form2: TForm2
         ImageIndex = -1
       end
     end
-  end
-  object Timer1: TTimer
-    Left = 592
-    Top = 208
   end
   object ListView1: TListView
     ItemAppearanceClassName = 'TImageListItemAppearance'
@@ -13270,6 +13289,12 @@ object Form2: TForm2
     Interval = 300
     OnTimer = Timer2Timer
     Left = 320
+    Top = 216
+  end
+  object Timer1: TTimer
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 592
     Top = 216
   end
   object ActionList1: TActionList
