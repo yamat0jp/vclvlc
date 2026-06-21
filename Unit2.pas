@@ -69,7 +69,6 @@ type
     Timer2: TTimer;
     ComboTrackBar1: TComboTrackBar;
     Label3: TLabel;
-    Timer1: TTimer;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure Action1Execute(Sender: TObject);
@@ -108,18 +107,21 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure ComboTrackBar1Change(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
+      position: Single);
   private
     { private éŒ¾ }
     mpos: TPointF;
     mmove, mdown, dclick: Boolean;
-    userSeeking: Boolean;
+    LastUpdate: Single;
+    userTracking: Boolean;
     procedure DropURL(const name: string);
   public
     { public éŒ¾ }
     title: string;
     filename: string;
     procedure Thumbnail;
+    procedure PlayFilename;
   end;
 
 var
@@ -256,10 +258,10 @@ begin
   finally
     ini.Free;
   end;
-  if s > '' then
+  if s <> '' then
   begin
     filename := s;
-    FmxPasLibVlcPlayer1.Play(filename);
+    FmxPasLibVlcPlayer1.PlayYoutube(filename);
   end;
 end;
 
@@ -284,19 +286,10 @@ procedure TForm2.FmxPasLibVlcPlayer1DragDrop(Sender: TObject;
   const Data: TDragObject; const Point: TPointF);
 begin
   if Length(Data.Files) > 0 then
-  begin
-    filename := Data.Files[0];
-    if ExtractFileExt(filename).ToLower = '.url' then
-      DropURL(filename)
-    else
-      FmxPasLibVlcPlayer1.Play(filename);
-    Exit;
-  end;
-  if (Data.Files <> nil) and (Data.Data.ToString <> '') then
-  begin
+    filename := Data.Files[0]
+  else
     filename := Data.Data.ToString;
-    FmxPasLibVlcPlayer1.PlayYoutube(filename);
-  end;
+  PlayFilename;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1DragOver(Sender: TObject;
@@ -327,6 +320,19 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
 begin
   Caption := ExtractFileName(filename);
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
+position: Single);
+begin
+  if TThread.GetTickCount - LastUpdate > 100 then
+  begin
+    userTracking := false;
+    LastUpdate := TThread.GetTickCount;
+    TrackBar1.Value := position * 100;
+    Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
+    userTracking := true;
+  end;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
@@ -363,6 +369,11 @@ begin
   Action2.Checked := Panel1.Visible;
   ComboTrackBar1Change(nil);
   Caption := 'no title';
+  if ParamCount > 2 then
+  begin
+    filename := ParamStr(1);
+    PlayFilename;
+  end;
 end;
 
 procedure TForm2.FormDestroy(Sender: TObject);
@@ -399,6 +410,14 @@ end;
 procedure TForm2.MenuItem7Click(Sender: TObject);
 begin
   FmxPasLibVlcPlayer1.Pause;
+end;
+
+procedure TForm2.PlayFilename;
+begin
+  if ExtractFileExt(filename).ToLower = '.url' then
+    DropURL(filename)
+  else if filename <> '' then
+    FmxPasLibVlcPlayer1.Play(filename);
 end;
 
 procedure TForm2.Thumbnail;
@@ -446,13 +465,6 @@ begin
     end);
 end;
 
-procedure TForm2.Timer1Timer(Sender: TObject);
-begin
-  userSeeking := true;
-  TrackBar1.Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
-  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
-end;
-
 procedure TForm2.Timer2Timer(Sender: TObject);
 begin
   Timer2.Enabled := false;
@@ -464,9 +476,8 @@ end;
 
 procedure TForm2.TrackBar1Tracking(Sender: TObject);
 begin
-  if not userSeeking then
+  if userTracking then
     FmxPasLibVlcPlayer1.SetVideoPosInPercent(TrackBar1.Value);
-  userSeeking := false;
 end;
 
 end.
