@@ -62,7 +62,6 @@ object Form2: TForm2
       SnapShotFmt = 'png'
       OnMediaPlayerOpening = FmxPasLibVlcPlayer1MediaPlayerOpening
       OnMediaPlayerEndReached = FmxPasLibVlcPlayer1MediaPlayerEndReached
-      OnMediaPlayerPositionChanged = FmxPasLibVlcPlayer1MediaPlayerPositionChanged
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
     end
     object Panel1: TPanel
@@ -13290,6 +13289,12 @@ object Form2: TForm2
     Interval = 300
     OnTimer = Timer2Timer
     Left = 320
+    Top = 216
+  end
+  object Timer1: TTimer
+    Interval = 300
+    OnTimer = Timer1Timer
+    Left = 584
     Top = 216
   end
   object ActionList1: TActionList

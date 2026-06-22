@@ -10,7 +10,8 @@ uses
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
   PasLibVlcPlayerUnit, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
-  System.ImageList, FMX.ImgList, FMX.Edit, FMX.EditBox, FMX.ComboTrackBar;
+  System.ImageList, FMX.ImgList, FMX.Edit, FMX.EditBox, FMX.ComboTrackBar,
+  PasLibVlcClassUnit, PasLibVlcUnit;
 
 type
   TForm2 = class(TForm)
@@ -69,6 +70,7 @@ type
     Timer2: TTimer;
     ComboTrackBar1: TComboTrackBar;
     Label3: TLabel;
+    Timer1: TTimer;
     procedure FmxPasLibVlcPlayer1MediaPlayerLengthChanged(Sender: TObject;
       time: Int64);
     procedure Action1Execute(Sender: TObject);
@@ -107,14 +109,14 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure ComboTrackBar1Change(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
-    procedure FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
-      position: Single);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private 宣言 }
     mpos: TPointF;
     mmove, mdown, dclick: Boolean;
-    LastUpdate: Single;
-    userTracking: Boolean;
+    userTracking, SleepTimer: Boolean;
+    Vlc: TPasLibVlc;
+    player: libvlc_media_player_t_ptr;
     procedure DropURL(const name: string);
   public
     { public 宣言 }
@@ -163,16 +165,20 @@ procedure TForm2.Action4Execute(Sender: TObject);
 var
   ms: Int64;
 begin
+  SleepTimer := true;
   ms := FmxPasLibVlcPlayer1.GetVideoPosInMs - 10000;
   FmxPasLibVlcPlayer1.SetVideoPosInMs(ms);
+  SleepTimer := false;
 end;
 
 procedure TForm2.Action5Execute(Sender: TObject);
 var
   ms: Int64;
 begin
+  SleepTimer := true;
   ms := FmxPasLibVlcPlayer1.GetVideoPosInMs + 10000;
   FmxPasLibVlcPlayer1.SetVideoPosInMs(ms);
+  SleepTimer := false;
 end;
 
 procedure TForm2.Action6Execute(Sender: TObject);
@@ -322,19 +328,6 @@ begin
   Caption := ExtractFileName(filename);
 end;
 
-procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPositionChanged(Sender: TObject;
-position: Single);
-begin
-  if TThread.GetTickCount - LastUpdate > 100 then
-  begin
-    userTracking := false;
-    LastUpdate := TThread.GetTickCount;
-    TrackBar1.Value := position * 100;
-    Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
-    userTracking := true;
-  end;
-end;
-
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
 Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
@@ -365,6 +358,11 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 begin
+  Vlc := TPasLibVlc.Create;
+  Vlc.AddOption('--quiet');
+  Vlc.AddOption('--vout=dummy');
+  player := libvlc_media_player_new(Vlc.Handle);
+
   FmxPasLibVlcPlayer1.EventsEnable;
   Action2.Checked := Panel1.Visible;
   ComboTrackBar1Change(nil);
@@ -379,6 +377,12 @@ end;
 procedure TForm2.FormDestroy(Sender: TObject);
 begin
   FmxPasLibVlcPlayer1.EventsDisable;
+  if Vlc <> nil then
+  begin
+    libvlc_media_player_release(player);
+    player := nil;
+  end;
+  FreeAndNil(Vlc);
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
@@ -426,43 +430,55 @@ begin
   TTask.Run(
     procedure
     var
-      Player: TFmxPasLibVlcPlayer;
-      fname: string;
+      tmpname: string;
+      media: TPasLibVlcMedia;
     begin
-      Player := TFmxPasLibVlcPlayer.Create(nil);
+      tmpname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
+      media := TPasLibVlcMedia.Create(Vlc, filename);
       try
-        fname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
-        Player.Play(filename);
-        Sleep(300);
-        Player.Pause;
+        libvlc_media_player_set_media(player, media.MD);
+        libvlc_media_player_play(player);
+        Sleep(600); // デコード開始待ち
+        libvlc_media_player_set_pause(player, 1);
         for var i := 0 to 9 do
         begin
-          Player.SetVideoPosInPercent(i * 10);
-          Sleep(200);
-          Player.SnapShot(fname, 50, 50);
-          Sleep(200);
-          TThread.Queue(nil,
+          libvlc_media_player_set_position(player, i * 0.1);
+          Sleep(800);
+
+          // ★ ここが本命：libVLC のスナップショット API
+          libvlc_video_take_snapshot(player, 0, // video output (0固定)
+            PAnsiChar(AnsiString(tmpname)), 100, 100 // サイズ（0,0なら元解像度）
+            );
+          Sleep(800);
+          TThread.Synchronize(nil,
             procedure
             var
               item: TListViewItem;
             begin
               item := ListView1.Items.Add;
-              if FileExists(fname) then
-                item.Bitmap.LoadFromFile(fname);
+              if FileExists(tmpname) then
+                item.Bitmap.LoadFromFile(tmpname);
               item.Text := (i * 10).ToString;
               item.Tag := i * 10;
             end);
         end;
+        libvlc_media_player_stop(player);
       finally
-        Player.Free;
-        TThread.Queue(nil,
-          procedure
-          begin
-            if FileExists(fname) then
-              DeleteFile(fname);
-          end);
+        media.Free;
+        if FileExists(tmpname) then
+          DeleteFile(tmpname);
       end;
     end);
+end;
+
+procedure TForm2.Timer1Timer(Sender: TObject);
+begin
+  if SleepTimer then
+    Exit;
+  userTracking := false;
+  TrackBar1.Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
+  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
+  userTracking := true;
 end;
 
 procedure TForm2.Timer2Timer(Sender: TObject);
@@ -476,8 +492,11 @@ end;
 
 procedure TForm2.TrackBar1Tracking(Sender: TObject);
 begin
-  if userTracking then
-    FmxPasLibVlcPlayer1.SetVideoPosInPercent(TrackBar1.Value);
+  if not userTracking then
+    Exit;
+  SleepTimer := true;
+  FmxPasLibVlcPlayer1.SetVideoPosInPercent(TrackBar1.Value);
+  SleepTimer := false;
 end;
 
 end.
