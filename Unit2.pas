@@ -299,7 +299,7 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1DragOver(Sender: TObject;
   const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation);
 begin
-  Operation := TDragOperation.Move;
+  Operation := TDragOperation.Copy;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerEndReached(Sender: TObject);
@@ -461,6 +461,7 @@ begin
     var
       tmpname: string;
       media: TPasLibVlcMedia;
+      utf8: UTF8String;
     begin
       tmpname := TPath.Combine(TPath.GetTempPath, 'snapshot.png');
       media := TPasLibVlcMedia.Create(Vlc, filename);
@@ -476,9 +477,10 @@ begin
           libvlc_media_player_set_position(player, i * 0.1);
           Sleep(800);
 
+          utf8:=tmpname;
           // ★ ここが本命：libVLC のスナップショット API
           libvlc_video_take_snapshot(player, 0, // video output (0固定)
-            PAnsiChar(AnsiString(tmpname)), 100, 100 // サイズ（0,0なら元解像度）
+            PAnsiChar(utf8), 100, 100 // サイズ（0,0なら元解像度）
             );
           Sleep(800);
           TThread.Synchronize(nil,
@@ -503,7 +505,7 @@ begin
       finally
         media.Free;
         if FileExists(tmpname) then
-          DeleteFile(PWideChar(tmpname));
+          System.SysUtils.DeleteFile(tmpname);
       end;
     end);
 end;
