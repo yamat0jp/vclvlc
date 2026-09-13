@@ -9,6 +9,7 @@ object Form2: TForm2
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
+  OnCloseQuery = FormCloseQuery
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -61,6 +62,7 @@ object Form2: TForm2
       OnMouseUp = FmxPasLibVlcPlayer1MouseUp
       SnapShotFmt = 'png'
       OnMediaPlayerOpening = FmxPasLibVlcPlayer1MediaPlayerOpening
+      OnMediaPlayerPlaying = FmxPasLibVlcPlayer1MediaPlayerPlaying
       OnMediaPlayerEndReached = FmxPasLibVlcPlayer1MediaPlayerEndReached
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
     end
@@ -119,7 +121,6 @@ object Form2: TForm2
         Size.Width = 65.000000000000000000
         Size.Height = 49.000000000000000000
         Size.PlatformDefault = False
-        TextSettings.Trimming = None
       end
       object SpeedButton3: TSpeedButton
         Action = Action4
@@ -129,7 +130,6 @@ object Form2: TForm2
         Size.Width = 41.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
-        TextSettings.Trimming = None
       end
       object SpeedButton4: TSpeedButton
         Action = Action5
@@ -139,7 +139,6 @@ object Form2: TForm2
         Size.Width = 40.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
-        TextSettings.Trimming = None
       end
       object Switch1: TSwitch
         Action = Action8
