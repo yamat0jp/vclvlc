@@ -63,6 +63,7 @@ object Form2: TForm2
       SnapShotFmt = 'png'
       OnMediaPlayerOpening = FmxPasLibVlcPlayer1MediaPlayerOpening
       OnMediaPlayerPlaying = FmxPasLibVlcPlayer1MediaPlayerPlaying
+      OnMediaPlayerPaused = FmxPasLibVlcPlayer1MediaPlayerPaused
       OnMediaPlayerEndReached = FmxPasLibVlcPlayer1MediaPlayerEndReached
       OnMediaPlayerLengthChanged = FmxPasLibVlcPlayer1MediaPlayerLengthChanged
     end

@@ -109,6 +109,7 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure ComboTrackBar1Change(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1MediaPlayerPaused(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -219,10 +220,7 @@ procedure TForm2.Action9Execute(Sender: TObject);
 begin
   with FmxPasLibVlcPlayer1 do
     if IsPlay then
-    begin
-      MenuItem7Click(nil);
-      SetThreadExecutionState(ES_CONTINUOUS);
-    end
+      MenuItem7Click(nil)
     else if IsPause then
       MenuItem6Click(nil)
     else
@@ -329,6 +327,11 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
 begin
   Caption := ExtractFileName(filename);
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPaused(Sender: TObject);
+begin
+  SetThreadExecutionState(ES_CONTINUOUS);
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
