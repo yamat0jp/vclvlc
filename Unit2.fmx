@@ -20,6 +20,7 @@ object Form2: TForm2
     Size.Height = 678.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
+    OnDragDrop = FmxPasLibVlcPlayer1DragDrop
     object FmxPasLibVlcPlayer1: TFmxPasLibVlcPlayer
       Touch.InteractiveGestures = [PressAndTap, LongTap, DoubleTap]
       MultiResBitmap = <

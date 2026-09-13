@@ -327,6 +327,7 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
 begin
   Caption := ExtractFileName(filename);
+  Timer1.Enabled:=false;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPaused(Sender: TObject);
@@ -337,6 +338,7 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
 begin
   SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_DISPLAY_REQUIRED or ES_CONTINUOUS);
+  Timer1.Enabled:=true;
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
