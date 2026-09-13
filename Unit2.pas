@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,
+  System.Variants, System.Threading,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.ListBox,
   FMX.Objects, FmxPasLibVlcPlayerUnit, System.Actions, FMX.ActnList, FMX.Menus,
@@ -109,7 +109,9 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure ComboTrackBar1Change(Sender: TObject);
     procedure FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
+    procedure FmxPasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { private êÈåæ }
     mpos: TPointF;
@@ -120,6 +122,7 @@ type
     procedure DropURL(const name: string);
   public
     { public êÈåæ }
+    task: ITask;
     title: string;
     filename: string;
     procedure Thumbnail;
@@ -133,7 +136,7 @@ implementation
 
 {$R *.fmx}
 
-uses System.Threading, FMX.Platform, IniFiles;
+uses FMX.Platform, IniFiles, System.StrUtils, System.IOUtils, Windows;
 
 const
   interval: Cardinal = 300;
@@ -216,7 +219,10 @@ procedure TForm2.Action9Execute(Sender: TObject);
 begin
   with FmxPasLibVlcPlayer1 do
     if IsPlay then
-      MenuItem7Click(nil)
+    begin
+      MenuItem7Click(nil);
+      SetThreadExecutionState(ES_CONTINUOUS);
+    end
     else if IsPause then
       MenuItem6Click(nil)
     else
@@ -256,18 +262,12 @@ end;
 procedure TForm2.DropURL(const name: string);
 var
   ini: TIniFile;
-  s: string;
 begin
   ini := TIniFile.Create(name);
   try
-    s := ini.ReadString('InternetShortcut', 'URL', '');
+    filename := ini.ReadString('InternetShortcut', 'URL', '');
   finally
     ini.Free;
-  end;
-  if s <> '' then
-  begin
-    filename := s;
-    FmxPasLibVlcPlayer1.PlayYoutube(filename);
   end;
 end;
 
@@ -312,7 +312,10 @@ begin
       if MenuItem25.IsChecked then
         FmxPasLibVlcPlayer1.Play(filename)
       else
+      begin
         FmxPasLibVlcPlayer1.Stop;
+        SetThreadExecutionState(ES_CONTINUOUS);
+      end;
     end);
 end;
 
@@ -326,6 +329,11 @@ end;
 procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerOpening(Sender: TObject);
 begin
   Caption := ExtractFileName(filename);
+end;
+
+procedure TForm2.FmxPasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
+begin
+  SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_DISPLAY_REQUIRED or ES_CONTINUOUS);
 end;
 
 procedure TForm2.FmxPasLibVlcPlayer1MouseDown(Sender: TObject;
@@ -356,6 +364,16 @@ begin
   mdown := false;
 end;
 
+procedure TForm2.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if Assigned(task) and (task.Status = TTaskStatus.Running) then
+  begin
+    Caption := 'èIóπçÏã∆';
+    task.Cancel;
+    task.Wait(1500);
+  end;
+end;
+
 procedure TForm2.FormCreate(Sender: TObject);
 begin
   Vlc := TPasLibVlc.Create;
@@ -367,7 +385,7 @@ begin
   Action2.Checked := Panel1.Visible;
   ComboTrackBar1Change(nil);
   Caption := 'no title';
-  if ParamCount > 2 then
+  if ParamCount >= 2 then
   begin
     filename := ParamStr(1);
     PlayFilename;
@@ -383,6 +401,7 @@ begin
     player := nil;
   end;
   FreeAndNil(Vlc);
+  SetThreadExecutionState(ES_CONTINUOUS);
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
@@ -419,21 +438,28 @@ end;
 procedure TForm2.PlayFilename;
 begin
   if ExtractFileExt(filename).ToLower = '.url' then
-    DropURL(filename)
-  else if filename <> '' then
+    DropURL(filename);
+  if StartsText('http', filename) then
+    FmxPasLibVlcPlayer1.PlayYoutube(filename)
+  else if Length(filename) > 0 then
     FmxPasLibVlcPlayer1.Play(filename);
 end;
 
 procedure TForm2.Thumbnail;
 begin
+  if Assigned(task) and (task.Status = TTaskStatus.Running) then
+  begin
+    task.Cancel;
+    task.Wait;
+  end;
   ListView1.Items.Clear;
-  TTask.Run(
+  task := TTask.Run(
     procedure
     var
       tmpname: string;
       media: TPasLibVlcMedia;
     begin
-      tmpname := ExtractFileDir(ParamStr(0)) + '\snapshot.png';
+      tmpname := TPath.Combine(TPath.GetTempPath, 'snapshot.png');
       media := TPasLibVlcMedia.Create(Vlc, filename);
       try
         libvlc_media_player_set_media(player, media.MD);
@@ -442,6 +468,8 @@ begin
         libvlc_media_player_set_pause(player, 1);
         for var i := 0 to 9 do
         begin
+          if TTask.CurrentTask.Status = TTaskStatus.Canceled then
+            break;
           libvlc_media_player_set_position(player, i * 0.1);
           Sleep(800);
 
@@ -455,18 +483,24 @@ begin
             var
               item: TListViewItem;
             begin
-              item := ListView1.Items.Add;
-              if FileExists(tmpname) then
-                item.Bitmap.LoadFromFile(tmpname);
-              item.Text := (i * 10).ToString;
-              item.Tag := i * 10;
+              try
+                item := ListView1.Items.Add;
+                if FileExists(tmpname) then
+                begin
+                  item.Bitmap.LoadFromFile(tmpname);
+                  item.Text := (i * 10).ToString;
+                  item.Tag := i * 10;
+                end;
+              except
+                on E: Exception do;
+              end;
             end);
         end;
         libvlc_media_player_stop(player);
       finally
         media.Free;
         if FileExists(tmpname) then
-          DeleteFile(tmpname);
+          DeleteFile(PWideChar(tmpname));
       end;
     end);
 end;
@@ -475,10 +509,15 @@ procedure TForm2.Timer1Timer(Sender: TObject);
 begin
   if SleepTimer then
     Exit;
+  if not Assigned(FmxPasLibVlcPlayer1) or not FmxPasLibVlcPlayer1.IsPlay then
+    Exit;
   userTracking := false;
-  TrackBar1.Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
-  Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
-  userTracking := true;
+  try
+    TrackBar1.Value := FmxPasLibVlcPlayer1.GetVideoPosInPercent;
+    Label1.Text := FmxPasLibVlcPlayer1.GetVideoPosStr;
+  finally
+    userTracking := true;
+  end;
 end;
 
 procedure TForm2.Timer2Timer(Sender: TObject);
